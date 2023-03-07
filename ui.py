@@ -34,15 +34,26 @@ class QuizInterface:
         self.window.mainloop()
 
     def get_next_question(self):
-        q_text = self.quiz.next_question()
-        self.main_canvas.itemconfig(self.question_text, text=q_text)
-
+        self.main_canvas.config(bg="white")
+        if self.quiz.still_has_questions():
+            self.score_label.config(text=f"Score: {self.quiz.score}")
+            q_text = self.quiz.next_question()
+            self.main_canvas.itemconfig(self.question_text, text=q_text)
+        else:
+            self.main_canvas.itemconfig(self.question_text, text="End of the quiz.")
+            self.wrong_button.config(state="disable")
+            self.right_button.config(state="disable")
     def clicked_true(self):
-        self.score = self.quiz.check_answer(user_answer="True")
-        self.score_label.config(text=f"Score: {self.quiz.score}")
-        self.get_next_question()
+        is_correct = self.quiz.check_answer(user_answer="True")
+        self.give_feedback(is_correct)
 
     def clicked_false(self):
-        self.score = self.quiz.check_answer(user_answer="False")
-        self.score_label.config(text=f"Score: {self.quiz.score}")
-        self.get_next_question()
+        is_correct = self.quiz.check_answer(user_answer="False")
+        self.give_feedback(is_correct)
+
+    def give_feedback(self, is_right: bool):
+        if is_right:
+            self.main_canvas.config(bg="green")
+        else:
+            self.main_canvas.config(bg="red")
+        self.window.after(1000, self.get_next_question)
